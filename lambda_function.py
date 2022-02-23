@@ -1,8 +1,27 @@
+import os
+import boto3
+import botocore
 import json
 import urllib.parse
+from hashlib import sha256
+from hmac import HMAC, compare_digest
+
+def verify_signature(headers, body):
+    try:
+        secret = os.environ.get("GITHUB_SECRET").encode("utf-8")
+        received = headers["X-Hub-Signature-256"].split("sha256=")[-1].strip()
+        expected = HMAC(secret, body.encode("utf-8"), sha256).hexdigest()
+    except (KeyError, TypeError):
+        return False
+    else:
+        return compare_digest(received, expected)
 
 def lambda_handler(event, context):
     print('inside lambda execution...')
+    if verify_signature(event["headers"], event["body"]):
+        print('verified signature success')
+    else: 
+        print('signature failed')
     #print("Received event: " + json.dumps(event, indent=2))
 
     body = event.get('body', "")
