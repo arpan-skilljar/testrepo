@@ -102,7 +102,8 @@ def lambda_handler(event, context):
 
     if (github_event == "pull_request") and (action == "synchronize"):
         print('Posted to github PR based on Git PR synchronize event...')
-        comment_on_pr(pull_request_num, "[ReviewApp] Pull Request Updated!")
+        comment = "[ReviewApp] Pull Request Updated!  Commit -> " + pull_request_commit
+        comment_on_pr(pull_request_num, comment)
 
     if (github_event == "pull_request") and (action == "closed"):
         print('Posted to github PR based on Git PR closed event...')
