@@ -96,13 +96,13 @@ def lambda_handler(event, context):
         print('the pull request creator is: ' + pull_request_creator)
         print('the pull request commit is: ' + pull_request_commit)
 
-    if github_event == "pull_request" & action == "open":
+    if (github_event == "pull_request") and (action == "open"):
         comment_on_pr(pull_request_num, "[ReviewApp] Pull Request Opened")
 
-    if github_event == "pull_request" & action == "synchornize":
+    if (github_event == "pull_request") and (action == "synchornize"):
         comment_on_pr(pull_request_num, "[ReviewApp] Pull Request Updated")
 
-    if github_event == "pull_request" & action == "closed":
+    if (github_event == "pull_request") and (action == "closed"):
         comment_on_pr(pull_request_num, "[ReviewApp] Pull Request Closed")       
 
     '''    
