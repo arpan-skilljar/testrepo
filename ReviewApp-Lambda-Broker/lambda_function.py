@@ -12,17 +12,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 def publish_message(topic, message, attributes):
-    """
-    Publishes a message, with attributes, to a topic. Subscriptions can be filtered
-    based on message attributes so that a subscription receives messages only
-    when specified attributes are present.
-
-    :param topic: The topic to publish to.
-    :param message: The message to publish.
-    :param attributes: The key-value attributes to attach to the message. Values
-                        must be either `str` or `bytes`.
-    :return: The ID of the message.
-    """
     try:
         att_dict = {}
         for key, value in attributes.items():
