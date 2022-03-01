@@ -7,32 +7,6 @@ from hashlib import sha256
 from hmac import HMAC, compare_digest
 from github import Github
 
-
-def get_value(self, stage=None):
-    """
-    Gets the value of a secret.
-
-    :param stage: The stage of the secret to retrieve. If this is None, the
-                    current stage is retrieved.
-    :return: The value of the secret. When the secret is a string, the value is
-                contained in the `SecretString` field. When the secret is bytes,
-                it is contained in the `SecretBinary` field.
-    """
-    if self.name is None:
-        raise ValueError
-
-    try:
-        kwargs = {'SecretId': self.name}
-        if stage is not None:
-            kwargs['VersionStage'] = stage
-        response = self.secretsmanager_client.get_secret_value(**kwargs)
-        logger.info("Got value for secret %s.", self.name)
-    except ClientError:
-        logger.exception("Couldn't get value for secret %s.", self.name)
-        raise
-    else:
-        return response
-
 def publish_message(topic, message, attributes):
     """
     Publishes a message, with attributes, to a topic. Subscriptions can be filtered
@@ -62,7 +36,6 @@ def publish_message(topic, message, attributes):
         raise
     else:
         return message_id
-
 
 def verify_signature(headers, body):
     try:
@@ -116,7 +89,7 @@ def lambda_handler(event, context):
         pull_request_title = body.get('pull_request').get('title')
         print("the pull request number is: " + pull_request_num)
         print('the pull request title is: ' + pull_request_title)
-    '''    
+        
     elif github_event == "issue_comment":
         pull_request_num = body.get('issue').get('number')
         issue_comment = body.get('comment').get('body')
@@ -132,8 +105,7 @@ def lambda_handler(event, context):
             }
         elif issue_comment == "start review app": 
             comment_on_pr(pull_request_num, "[ReviewApp] whatever comment we want")
-
-    '''     
+            
     #list_github_repos()
 
     return {
