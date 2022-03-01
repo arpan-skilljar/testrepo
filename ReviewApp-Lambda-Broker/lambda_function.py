@@ -99,7 +99,7 @@ def lambda_handler(event, context):
     if (github_event == "pull_request") and (action == "open"):
         comment_on_pr(pull_request_num, "[ReviewApp] Pull Request Opened")
 
-    if (github_event == "pull_request") and (action == "synchornize"):
+    if (github_event == "pull_request") and (action == "synchronize"):
         comment_on_pr(pull_request_num, "[ReviewApp] Pull Request Updated")
 
     if (github_event == "pull_request") and (action == "closed"):
