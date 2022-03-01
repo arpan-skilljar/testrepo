@@ -105,7 +105,7 @@ def lambda_handler(event, context):
         print('the pull request creator is: ' + pull_request_creator)
         print('the pull request commit is: ' + pull_request_commit)
 
-    if (github_event == "pull_request") and (action == "open"):
+    if (github_event == "pull_request") and (action == "opened"):
         print('Posted to github PR based on Git PR open event...')
         comment_on_pr(pull_request_num, "[ReviewApp] Pull Request Opened!")
 
