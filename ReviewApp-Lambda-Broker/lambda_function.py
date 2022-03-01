@@ -78,10 +78,11 @@ def lambda_handler(event, context):
     # get rid of 'payload='
     body = body[8:]
 
+    print("the body is: " + body)
+
     # convert to json object
     body = json.loads(body)
-    print("the body is: " + str(json.loads(body)))
-    
+
     action = body.get('action')
     print("the action is: " + action)
     
