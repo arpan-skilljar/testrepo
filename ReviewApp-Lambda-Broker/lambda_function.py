@@ -89,10 +89,22 @@ def lambda_handler(event, context):
     if github_event == "pull_request":
         pull_request_num = str(body.get('number'))
         pull_request_title = body.get('pull_request').get('title')
+        pull_request_creator = body.get('pull_request').get('user').get('login')
         pull_request_commit = body.get('pull_request').get('head').get('sha')
         print("the pull request number is: " + pull_request_num)
         print('the pull request title is: ' + pull_request_title)
+        print('the pull request creator is: ' + pull_request_creator)
         print('the pull request commit is: ' + pull_request_commit)
+
+    if github_event == "pull_request" & action == "open":
+        comment_on_pr(pull_request_num, "[ReviewApp] Pull Request Opened")
+
+    if github_event == "pull_request" & action == "synchornize":
+        comment_on_pr(pull_request_num, "[ReviewApp] Pull Request Updated")
+
+    if github_event == "pull_request" & action == "closed":
+        comment_on_pr(pull_request_num, "[ReviewApp] Pull Request Closed")       
+
     '''    
     elif github_event == "issue_comment":
         pull_request_num = body.get('issue').get('number')
