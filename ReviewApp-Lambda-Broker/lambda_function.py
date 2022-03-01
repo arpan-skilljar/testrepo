@@ -89,9 +89,11 @@ def lambda_handler(event, context):
     if github_event == "pull_request":
         pull_request_num = str(body.get('number'))
         pull_request_title = body.get('pull_request').get('title')
+        pull_request_commit = body.get('pull_request').get('head').get('sha')
         print("the pull request number is: " + pull_request_num)
         print('the pull request title is: ' + pull_request_title)
-        
+        print('the pull request commit is: ' + pull_request_commit)
+    '''    
     elif github_event == "issue_comment":
         pull_request_num = body.get('issue').get('number')
         issue_comment = body.get('comment').get('body')
@@ -109,6 +111,7 @@ def lambda_handler(event, context):
             comment_on_pr(pull_request_num, "[ReviewApp] whatever comment we want")
             
     #list_github_repos()
+    '''
 
     return {
         'statusCode': 200,
