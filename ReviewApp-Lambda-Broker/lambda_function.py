@@ -6,6 +6,7 @@ import urllib.parse
 from hashlib import sha256
 from hmac import HMAC, compare_digest
 from github import Github
+from botocore.exceptions import ClientError
 
 def publish_message(topic, message, attributes):
     """
