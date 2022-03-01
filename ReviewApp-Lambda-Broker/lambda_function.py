@@ -6,6 +6,10 @@ import urllib.parse
 from hashlib import sha256
 from hmac import HMAC, compare_digest
 from github import Github
+from botocore.exceptions import ClientError
+import logging
+
+logger = logging.getLogger(__name__)
 
 def publish_message(topic, message, attributes):
     """
@@ -78,18 +82,64 @@ def lambda_handler(event, context):
     # get rid of 'payload='
     body = body[8:]
 
+    print("the body is: " + body)
+
     # convert to json object
     body = json.loads(body)
-    
+
     action = body.get('action')
     print("the action is: " + action)
+
+    # setup SNS
+    TOPIC_ARN = 'arn:aws:sns:us-west-2:420762066547:githubLambdaBroker'
+    sns_resource = boto3.resource('sns')
+    topic = sns_resource.Topic(TOPIC_ARN)
     
     if github_event == "pull_request":
-        pull_request_num = str(body.get('number'))
+        pull_request_num = body.get('number')
         pull_request_title = body.get('pull_request').get('title')
-        print("the pull request number is: " + pull_request_num)
+        pull_request_creator = body.get('pull_request').get('user').get('login')
+        pull_request_commit = body.get('pull_request').get('head').get('sha')
+        print("the pull request number is: " + str(pull_request_num))
         print('the pull request title is: ' + pull_request_title)
-        
+        print('the pull request creator is: ' + pull_request_creator)
+        print('the pull request commit is: ' + pull_request_commit)
+
+    if (github_event == "pull_request") and (action == "opened"):
+        print('Posted to github PR based on Git PR open event...')
+        comment_on_pr(pull_request_num, "[ReviewApp] Pull Request Opened!")
+
+        # SNS publish
+        message = 'github-reviewapp-actions'
+        attributes = {'action': 'open', 'pr_number': str(pull_request_num), \
+            'commit_sha': pull_request_commit, \
+            'creator': pull_request_creator}
+        publish_message(topic, message, attributes)
+
+    if (github_event == "pull_request") and (action == "synchronize"):
+        print('Posted to github PR based on Git PR synchronize event...')
+        comment = "[ReviewApp] Pull Request Updated!  Commit -> " + pull_request_commit
+        comment_on_pr(pull_request_num, comment)
+
+        # SNS publish
+        message = 'github-reviewapp-actions'
+        attributes = {'action': 'updated', 'pr_number': str(pull_request_num), \
+            'commit_sha': pull_request_commit, \
+            'creator': pull_request_creator}
+        publish_message(topic, message, attributes)        
+
+    if (github_event == "pull_request") and (action == "closed"):
+        print('Posted to github PR based on Git PR closed event...')
+        comment_on_pr(pull_request_num, "[ReviewApp] Pull Request Closed!")
+
+        # SNS publish
+        message = 'github-reviewapp-actions'
+        attributes = {'action': 'closed', 'pr_number': str(pull_request_num), \
+            'commit_sha': pull_request_commit, \
+            'creator': pull_request_creator}
+        publish_message(topic, message, attributes)   
+
+    '''    
     elif github_event == "issue_comment":
         pull_request_num = body.get('issue').get('number')
         issue_comment = body.get('comment').get('body')
@@ -107,6 +157,7 @@ def lambda_handler(event, context):
             comment_on_pr(pull_request_num, "[ReviewApp] whatever comment we want")
             
     #list_github_repos()
+    '''
 
     return {
         'statusCode': 200,
