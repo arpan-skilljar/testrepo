@@ -80,6 +80,7 @@ def lambda_handler(event, context):
 
     # convert to json object
     body = json.loads(body)
+    print("the body is: " + str(json.loads(body)))
     
     action = body.get('action')
     print("the action is: " + action)
