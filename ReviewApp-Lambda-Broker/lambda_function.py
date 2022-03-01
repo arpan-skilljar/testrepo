@@ -7,6 +7,7 @@ from hashlib import sha256
 from hmac import HMAC, compare_digest
 from github import Github
 from botocore.exceptions import ClientError
+import logging
 
 logger = logging.getLogger(__name__)
 
