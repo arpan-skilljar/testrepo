@@ -8,6 +8,8 @@ from hmac import HMAC, compare_digest
 from github import Github
 from botocore.exceptions import ClientError
 
+logger = logging.getLogger(__name__)
+
 def publish_message(topic, message, attributes):
     """
     Publishes a message, with attributes, to a topic. Subscriptions can be filtered
