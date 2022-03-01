@@ -85,6 +85,11 @@ def lambda_handler(event, context):
 
     action = body.get('action')
     print("the action is: " + action)
+
+    # setup SNS
+    TOPIC_ARN = 'arn:aws:sns:us-west-2:420762066547:githubLambdaBroker'
+    sns_resource = boto3.resource('sns')
+    topic = sns_resource.Topic(TOPIC_ARN)
     
     if github_event == "pull_request":
         pull_request_num = body.get('number')
@@ -100,14 +105,29 @@ def lambda_handler(event, context):
         print('Posted to github PR based on Git PR open event...')
         comment_on_pr(pull_request_num, "[ReviewApp] Pull Request Opened!")
 
+        # SNS publish
+        message = 'github-reviewapp-actions'
+        attributes = {'action': 'open', 'anotherattribute': 'anothervalue'}
+        publish_message(topic, message, attributes)
+
     if (github_event == "pull_request") and (action == "synchronize"):
         print('Posted to github PR based on Git PR synchronize event...')
         comment = "[ReviewApp] Pull Request Updated!  Commit -> " + pull_request_commit
         comment_on_pr(pull_request_num, comment)
 
+        # SNS publish
+        message = 'github-reviewapp-actions'
+        attributes = {'action': 'updated', 'anotherattribute': 'anothervalue'}
+        publish_message(topic, message, attributes)        
+
     if (github_event == "pull_request") and (action == "closed"):
         print('Posted to github PR based on Git PR closed event...')
-        comment_on_pr(pull_request_num, "[ReviewApp] Pull Request Closed!")   
+        comment_on_pr(pull_request_num, "[ReviewApp] Pull Request Closed!")
+
+        # SNS publish
+        message = 'github-reviewapp-actions'
+        attributes = {'action': 'closed', 'anotherattribute': 'anothervalue'}
+        publish_message(topic, message, attributes)   
 
     '''    
     elif github_event == "issue_comment":
