@@ -111,7 +111,9 @@ def lambda_handler(event, context):
 
         # SNS publish
         message = 'github-reviewapp-actions'
-        attributes = {'action': 'open', 'anotherattribute': 'anothervalue'}
+        attributes = {'action': 'open', 'pr_number': str(pull_request_num), \
+            'commit_sha': pull_request_commit, \
+            'creator': pull_request_creator}
         publish_message(topic, message, attributes)
 
     if (github_event == "pull_request") and (action == "synchronize"):
@@ -121,7 +123,9 @@ def lambda_handler(event, context):
 
         # SNS publish
         message = 'github-reviewapp-actions'
-        attributes = {'action': 'updated', 'anotherattribute': 'anothervalue'}
+        attributes = {'action': 'updated', 'pr_number': str(pull_request_num), \
+            'commit_sha': pull_request_commit, \
+            'creator': pull_request_creator}
         publish_message(topic, message, attributes)        
 
     if (github_event == "pull_request") and (action == "closed"):
@@ -130,7 +134,9 @@ def lambda_handler(event, context):
 
         # SNS publish
         message = 'github-reviewapp-actions'
-        attributes = {'action': 'closed', 'anotherattribute': 'anothervalue'}
+        attributes = {'action': 'closed', 'pr_number': str(pull_request_num), \
+            'commit_sha': pull_request_commit, \
+            'creator': pull_request_creator}
         publish_message(topic, message, attributes)   
 
     '''    
