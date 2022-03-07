@@ -30,6 +30,24 @@ def publish_message(topic, message, attributes):
     else:
         return message_id
 
+def get_value(name, stage=None):
+    secret = boto3.client('secretsmanager')
+
+    if name is None:
+        raise ValueError
+
+    try:
+        kwargs = {'SecretId': name}
+        if stage is not None:
+            kwargs['VersionStage'] = stage
+        response = secret.get_secret_value(**kwargs)
+        logger.info("Got value for secret %s.", name)
+    except ClientError:
+        logger.exception("Couldn't get value for secret %s.", name)
+        raise
+    else:
+        return response
+
 def verify_signature(headers, body):
     try:
         secret = os.environ.get("GITHUB_SECRET").encode("utf-8")
@@ -61,6 +79,10 @@ def lambda_handler(event, context):
             'headers': {'Content-Type': 'text'},
             'body': 'this request is not coming from github',
         }
+
+    secret_value = get_value('github_token')
+
+    print('the github token from secrets manager is: ' + secret_value)
 
     body = event.get('body', "")
     github_event = event.get('multiValueHeaders').get('X-GitHub-Event')
