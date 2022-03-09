@@ -30,7 +30,7 @@ def publish_message(topic, message, attributes):
     else:
         return message_id
 
-def get_value(name, stage=None):
+def get_secret_value(name, stage=None):
     secret = boto3.client('secretsmanager')
 
     if name is None:
@@ -41,16 +41,17 @@ def get_value(name, stage=None):
         if stage is not None:
             kwargs['VersionStage'] = stage
         response = secret.get_secret_value(**kwargs)
-        logger.info("Got value for secret %s.", name)
+        response_json = json.loads(response['SecretString'])
+        secret_value = response_json[name]
     except ClientError:
-        logger.exception("Couldn't get value for secret %s.", name)
+        print("Couldn't get value for secret %s.", name)
         raise
     else:
-        return response
+        return secret_value
 
 def verify_signature(headers, body):
     try:
-        secret = os.environ.get("GITHUB_SECRET").encode("utf-8")
+        secret = get_secret_value('github_secret').encode("utf-8")
         received = headers["X-Hub-Signature-256"].split("sha256=")[-1].strip()
         expected = HMAC(secret, body.encode("utf-8"), sha256).hexdigest()
     except (KeyError, TypeError):
@@ -59,7 +60,7 @@ def verify_signature(headers, body):
         return compare_digest(received, expected)
 
 def comment_on_pr(PR_NUMBER, comment):
-    github_access_token = str(os.environ.get("GITHUB_ACCESS_TOKEN"))
+    github_access_token = get_secret_value('github_token')
     g = Github(github_access_token)
     #for repo in g.get_user().get_repos():
     #    print(repo.name)
@@ -79,10 +80,6 @@ def lambda_handler(event, context):
             'headers': {'Content-Type': 'text'},
             'body': 'this request is not coming from github',
         }
-
-    secret_value = get_value('github_token')
-
-    print('the github token from secrets manager is: ' + secret_value)
 
     body = event.get('body', "")
     github_event = event.get('multiValueHeaders').get('X-GitHub-Event')
@@ -152,26 +149,6 @@ def lambda_handler(event, context):
             'commit_sha': pull_request_commit, \
             'creator': pull_request_creator}
         publish_message(topic, message, attributes)   
-
-    '''    
-    elif github_event == "issue_comment":
-        pull_request_num = body.get('issue').get('number')
-        issue_comment = body.get('comment').get('body')
-        print("the pull request number is: " + str(pull_request_num))
-        print('the comment on the pull request is: ' + issue_comment)
-        print('the issue comment truncated is: ' + issue_comment[0:11])
-        from_reviewapp = issue_comment[0:11]
-        if from_reviewapp == "[ReviewApp]":
-            return {
-                'statusCode': 200,
-                'headers': {'Content-Type': 'text'},
-                'body': 'nothing to do, comment from reviewapp',
-            }
-        elif issue_comment == "start review app": 
-            comment_on_pr(pull_request_num, "[ReviewApp] whatever comment we want")
-            
-    #list_github_repos()
-    '''
 
     return {
         'statusCode': 200,
