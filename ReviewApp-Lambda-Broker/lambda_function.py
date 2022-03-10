@@ -157,10 +157,11 @@ def lambda_handler(event, context):
         review_app_payload_item['uuid'] = attributes['uid']
         review_app_payload_item['github_payload'] = attributes['body']
 
-        attributes_without_payload = attributes
+        attributes_without_payload = attributes.copy()
         attributes_without_payload.pop('body')
-        attributes_without_payload.pop('uid')
+        #attributes_without_payload.pop('uid')
         attributes_without_payload['payload_uuid'] = attributes['uid']
+        attributes_without_payload.pop('uid')
 
         add_item_to_dynamo(reviewapp_payload_table_name, review_app_payload_item)
 
