@@ -41,8 +41,8 @@ def get_secret_value(name, stage=None):
         if stage is not None:
             kwargs['VersionStage'] = stage
         response = secret.get_secret_value(**kwargs)
-        response_json = json.loads(response['SecretString'])
-        secret_value = response_json[name]
+        print('the response from secrets is ', response)
+        secret_value = response['SecretString']
     except ClientError:
         print("Couldn't get value for secret %s.", name)
         raise
@@ -51,7 +51,7 @@ def get_secret_value(name, stage=None):
 
 def verify_signature(headers, body):
     try:
-        secret = get_secret_value('github_secret').encode("utf-8")
+        secret = get_secret_value('reviewapp_github_secret').encode("utf-8")
         received = headers["X-Hub-Signature-256"].split("sha256=")[-1].strip()
         expected = HMAC(secret, body.encode("utf-8"), sha256).hexdigest()
     except (KeyError, TypeError):
@@ -60,7 +60,7 @@ def verify_signature(headers, body):
         return compare_digest(received, expected)
 
 def comment_on_pr(PR_NUMBER, comment):
-    github_access_token = get_secret_value('github_token')
+    github_access_token = get_secret_value('reviewapp_github_token')
     g = Github(github_access_token)
     #for repo in g.get_user().get_repos():
     #    print(repo.name)
