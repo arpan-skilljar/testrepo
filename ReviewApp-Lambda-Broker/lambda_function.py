@@ -27,8 +27,8 @@ sns_resource = boto3.resource('sns')
 topic = sns_resource.Topic(TOPIC_ARN)
 
 # configure DynamoDB client
-dynamodb = boto3.client('dynamodb')
-table_name = os.environ['REVIEW_APP_TABLE']
+reviewapp_payload_table_name = os.environ['REVIEW_APP_PAYLOAD_TABLE']
+reviewapp_table_name = os.environ['REVIEW_APP_TABLE']
 
 # configure epoch time
 epoch_time = str(round(time.time()))
@@ -86,14 +86,19 @@ def comment_on_pr(PR_NUMBER, comment, repo_name):
     pr = repo.get_pull(PR_NUMBER)
     pr.create_issue_comment(comment)
  
-def add_github_payload_to_dynamo(table_name, attributes):
+def add_item_to_dynamo(table_name, attributes):
+    '''
     dynamodb.put_item(
     TableName = table_name, Item = {
       'payload_uuid':{'S' : attributes['uid']},
-      'github_payload':{'S' : "testing..."},
+      'github_payload':{'M' : attributes['body']},
       'pr_num':{'N' : attributes["pr_number"]},
       'commit_utc_sha':{'S' : attributes['commit_utc_sha']}
       })
+    '''
+    database = boto3.resource('dynamodb')
+    table = database.Table(table_name)
+    table.put_item(Item = attributes)
 
 def lambda_handler(event, context):
     logger.info('inside lambda execution...')
@@ -150,14 +155,33 @@ def lambda_handler(event, context):
 
         attributes = {'commit_utc_sha': commit_utc_sha, \
             'uid': uid, \
+            'body': body, \
             'pr_number': str(pull_request_num), \
             'commit_sha': pull_request_commit, \
             'creator': pull_request_creator, \
             'pull_request_branch': pull_request_branch,   \
             'pull_request_title': pull_request_title}
 
-        logger.info('adding github payload to dynamo...')
-        add_github_payload_to_dynamo(table_name, attributes)
+        #attributes_string = json.dumps(attributes, indent=4, sort_keys=True, default=str)
+
+        review_app_item = {}
+        review_app_item['pr_num'] = int(attributes['pr_number'])
+        review_app_item['commit_utc_sha'] = attributes['commit_utc_sha']
+        review_app_item['payload_uuid'] = attributes['uid']
+        review_app_item['commit_sha'] = attributes['commit_sha']
+        review_app_item['creator'] = attributes['creator']
+        review_app_item['pull_request_branch'] = attributes['pull_request_branch']
+        review_app_item['pull_request_title'] = attributes['pull_request_title']
+
+        review_app_payload_item = {}
+        review_app_payload_item['uuid'] = attributes['uid']
+        review_app_payload_item['github_payload'] = attributes['body']
+
+        attributes_without_payload = attributes
+        attributes_without_payload.pop('body')
+
+        add_item_to_dynamo(reviewapp_table_name, review_app_item)
+        add_item_to_dynamo(reviewapp_payload_table_name, review_app_payload_item)
 
     if (github_event == "pull_request") and (action == "opened" or action == "reopened"):
         logger.info('Posted to github PR based on Git PR open event...')
@@ -166,7 +190,7 @@ def lambda_handler(event, context):
         # SNS publish
         message = 'github-reviewapp-actions'
         attributes["action"] = "open"
-        publish_message(topic, message, attributes)
+        publish_message(topic, message, attributes_without_payload)
 
     if (github_event == "pull_request") and (action == "synchronize"):
         logger.info('Posted to github PR based on Git PR synchronize event...')
@@ -176,7 +200,7 @@ def lambda_handler(event, context):
         # SNS publish
         message = 'github-reviewapp-actions'
         attributes["action"] = "updated"
-        publish_message(topic, message, attributes)        
+        publish_message(topic, message, attributes_without_payload)        
 
     if (github_event == "pull_request") and (action == "closed"):
         logger.info('Posted to github PR based on Git PR closed event...')
@@ -185,7 +209,7 @@ def lambda_handler(event, context):
         # SNS publish
         message = 'github-reviewapp-actions'
         attributes["action"] = "closed"
-        publish_message(topic, message, attributes)   
+        publish_message(topic, message, attributes_without_payload)   
 
     return {
         'statusCode': 200,
