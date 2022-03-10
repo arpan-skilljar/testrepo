@@ -28,7 +28,6 @@ topic = sns_resource.Topic(TOPIC_ARN)
 
 # configure DynamoDB client
 reviewapp_payload_table_name = os.environ['REVIEW_APP_PAYLOAD_TABLE']
-reviewapp_table_name = os.environ['REVIEW_APP_TABLE']
 
 # configure epoch time
 epoch_time = str(round(time.time()))
@@ -87,15 +86,6 @@ def comment_on_pr(PR_NUMBER, comment, repo_name):
     pr.create_issue_comment(comment)
  
 def add_item_to_dynamo(table_name, attributes):
-    '''
-    dynamodb.put_item(
-    TableName = table_name, Item = {
-      'payload_uuid':{'S' : attributes['uid']},
-      'github_payload':{'M' : attributes['body']},
-      'pr_num':{'N' : attributes["pr_number"]},
-      'commit_utc_sha':{'S' : attributes['commit_utc_sha']}
-      })
-    '''
     database = boto3.resource('dynamodb')
     table = database.Table(table_name)
     table.put_item(Item = attributes)
@@ -163,24 +153,15 @@ def lambda_handler(event, context):
             'pull_request_title': pull_request_title}
 
         #attributes_string = json.dumps(attributes, indent=4, sort_keys=True, default=str)
-
-        review_app_item = {}
-        review_app_item['pr_num'] = int(attributes['pr_number'])
-        review_app_item['commit_utc_sha'] = attributes['commit_utc_sha']
-        review_app_item['payload_uuid'] = attributes['uid']
-        review_app_item['commit_sha'] = attributes['commit_sha']
-        review_app_item['creator'] = attributes['creator']
-        review_app_item['pull_request_branch'] = attributes['pull_request_branch']
-        review_app_item['pull_request_title'] = attributes['pull_request_title']
-
         review_app_payload_item = {}
         review_app_payload_item['uuid'] = attributes['uid']
         review_app_payload_item['github_payload'] = attributes['body']
 
         attributes_without_payload = attributes
         attributes_without_payload.pop('body')
+        attributes_without_payload.pop('uid')
+        attributes_without_payload['payload_uuid'] = attributes['uid']
 
-        add_item_to_dynamo(reviewapp_table_name, review_app_item)
         add_item_to_dynamo(reviewapp_payload_table_name, review_app_payload_item)
 
     if (github_event == "pull_request") and (action == "opened" or action == "reopened"):
@@ -189,7 +170,7 @@ def lambda_handler(event, context):
 
         # SNS publish
         message = 'github-reviewapp-actions'
-        attributes["action"] = "open"
+        attributes_without_payload["action"] = "open"
         publish_message(topic, message, attributes_without_payload)
 
     if (github_event == "pull_request") and (action == "synchronize"):
@@ -199,7 +180,7 @@ def lambda_handler(event, context):
 
         # SNS publish
         message = 'github-reviewapp-actions'
-        attributes["action"] = "updated"
+        attributes_without_payload["action"] = "updated"
         publish_message(topic, message, attributes_without_payload)        
 
     if (github_event == "pull_request") and (action == "closed"):
@@ -208,7 +189,7 @@ def lambda_handler(event, context):
 
         # SNS publish
         message = 'github-reviewapp-actions'
-        attributes["action"] = "closed"
+        attributes_without_payload["action"] = "closed"
         publish_message(topic, message, attributes_without_payload)   
 
     return {
