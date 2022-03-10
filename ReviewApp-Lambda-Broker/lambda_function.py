@@ -115,6 +115,7 @@ def lambda_handler(event, context):
 
     # get UID from github payload
     uid = event.get('multiValueHeaders').get('X-GitHub-Delivery')
+    uid = str(uid[0])
 
     github_event = str(github_event[0])
     logger.info('the github event is: ' + github_event)
