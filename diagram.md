@@ -1,12 +1,12 @@
-```ReviewApp
+```mermaid
 sequenceDiagram
-    participant Github
-    participant AWS-Lambdas
-    participant ReviewApp-Portal
-    Github->>AWS-Lambdas: loads html w/ AWS-Lambdas url
-    AWS-Lambdas->>ReviewApp-Portal: request template
-    ReviewApp-Portal->>AWS-Lambdas: html & javascript
-    AWS-Lambdas->>Github: AWS-Lambdas ready
-    Github->>AWS-Lambdas: set mermaid data on AWS-Lambdas
-    AWS-Lambdas->>AWS-Lambdas: render mermaid
+    participant dotcom
+    participant iframe
+    participant viewscreen
+    dotcom->>iframe: loads html w/ iframe url
+    iframe->>viewscreen: request template
+    viewscreen->>iframe: html & javascript
+    iframe->>dotcom: iframe ready
+    dotcom->>iframe: set mermaid data on iframe
+    iframe->>iframe: render mermaid
 ```
