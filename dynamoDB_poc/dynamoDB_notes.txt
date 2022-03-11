@@ -1,0 +1,46 @@
+commit_sha: cc9e71a3fd66985405271ce4e841f2d5d3c9282d
+
+global versus local
+
+
+PR 1 is created
+    review_app_status = loading
+    until build image is ready
+
+build image for PR 1 commit is ready  
+    review_app_status = ready
+
+review app is started from portal
+    review_app_status = running
+
+review app is terminated from portal OR PR is closed
+    review_app_status = closed
+
+-----------------------------------------------------
+commit_sha: 4837f0d0ff6c86f0f09b844f6580be85d9f0ff92
+
+new commit to PR 1
+    review_app_status = loading
+
+build image for PR 1 new commit ready  
+    review_app_status = ready
+
+-----------------------------------------------------
+
+# get me all info related to PR = 1 and commit hash = 4837f0d0ff6c86f0f09b844f6580be85d9f0ff92
+
+aws dynamodb query --table-name ReviewApps-POC-2 \
+    --key-condition-expression "pr_num = :pr_num AND begins_with(commit_sha_utc, :commit_hash)" \
+    --expression-attribute-values file://expression-attributes-sha1.json
+
+# get me all info related to PR = 1 and commit hash = cc9e71a3fd66985405271ce4e841f2d5d3c9282d
+
+aws dynamodb query --table-name ReviewApps-POC-2 \
+    --key-condition-expression "pr_num = :pr_num AND begins_with(commit_sha_utc, :commit_hash)" \
+    --expression-attribute-values file://expression-attributes-sha2.json
+
+# get me all info related to PR = 1
+
+aws dynamodb query --table-name ReviewApps-POC-2 \
+    --key-condition-expression "pr_num = :pr_num" \
+    --expression-attribute-values file://expression-attributes-pr.json
