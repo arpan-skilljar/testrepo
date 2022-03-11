@@ -1,12 +1,12 @@
 ```mermaid
 sequenceDiagram
     participant github
-    participant iframe
+    participant aws
     participant viewscreen
-    github->>iframe: loads html w/ iframe url
-    iframe->>viewscreen: request template
-    viewscreen->>iframe: html & javascript
-    iframe->>github: iframe ready
-    github->>iframe: set mermaid data on iframe
-    iframe->>iframe: render mermaid
+    github->>aws: pull request events trigger lambda
+    aws->>aws: lambda stores event details in dynamo
+    viewscreen->>aws: html & javascript
+    aws->>github: iframe ready
+    github->>aws: set mermaid data on iframe
+    aws->>aws: render mermaid
 ```
