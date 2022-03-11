@@ -1,12 +1,12 @@
 ```mermaid
 sequenceDiagram
     participant github
-    participant aws-lambda
+    participant iframe
     participant viewscreen
-    github->>aws-lambda: loads html w/ iframe url
-    aws-lambda->>viewscreen: request template
-    viewscreen->>aws-lambda: html & javascript
-    aws-lambda->>github: iframe ready
-    github->>aws-lambda: set mermaid data on iframe
-    aws-lambda->>aws-lambda: render mermaid
+    github->>iframe: loads html w/ iframe url
+    iframe->>viewscreen: request template
+    viewscreen->>iframe: html & javascript
+    iframe->>github: iframe ready
+    github->>iframe: set mermaid data on iframe
+    iframe->>iframe: render mermaid
 ```
