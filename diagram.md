@@ -1,4 +1,4 @@
-```mermaid
+```reviewapps
 sequenceDiagram
     participant dotcom
     participant iframe
