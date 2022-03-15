@@ -9,7 +9,7 @@ Create Review App
     aws->>aws: consumer lambda invokes codebuild to create image for commit
     aws->>aws: event bridge waits for codebuild to succeed and invokes lambda
     aws->>github: lambda comments on PR with portal link & updates dynamoDB
-    portal->>aws: user can select which apps are needed for PR (course-platform, api, admin, dashboard)
+    portal->>aws: user can select which apps are needed for PR (courseplatform, api, admin, dashboard)
     portal->>aws: user invokes specific review apps for the PR
     portal->>aws: publishes message to SNS topic w/ReviewApp details
     aws->>aws: consumer lambda creates reviewapps using cloudformation (ECS Fargate Services)
