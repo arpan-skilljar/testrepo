@@ -1,5 +1,5 @@
 ```mermaid
-Create Review App
+sequenceDiagram
     participant github
     participant aws
     participant portal
