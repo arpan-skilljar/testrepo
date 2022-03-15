@@ -1,0 +1,76 @@
+{
+  "version": "16.0.0",
+  "artifacts": {
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    },
+    "reviewapps-github-webhook-broker.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "reviewapps-github-webhook-broker.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "reviewapps-github-webhook-broker": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://420762066547/us-west-2",
+      "properties": {
+        "templateFile": "reviewapps-github-webhook-broker.template.json",
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::420762066547:role/cdk-hnb659fds-deploy-role-420762066547-us-west-2",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::420762066547:role/cdk-hnb659fds-cfn-exec-role-420762066547-us-west-2",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-420762066547-us-west-2/2960f1a34b27a53ab19ef9d11da6db35451bdb179f50650689f1b26f714c5187.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "reviewapps-github-webhook-broker.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::420762066547:role/cdk-hnb659fds-lookup-role-420762066547-us-west-2",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "reviewapps-github-webhook-broker.assets"
+      ],
+      "metadata": {
+        "/reviewapps-github-webhook-broker/AppFunction/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AppFunctionServiceRoleC222DDCC"
+          }
+        ],
+        "/reviewapps-github-webhook-broker/AppFunction/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AppFunction05AF654E"
+          }
+        ],
+        "/reviewapps-github-webhook-broker/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/reviewapps-github-webhook-broker/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/reviewapps-github-webhook-broker/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "reviewapps-github-webhook-broker"
+    }
+  }
+}
