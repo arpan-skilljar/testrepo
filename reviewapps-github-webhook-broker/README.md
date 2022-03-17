@@ -1,58 +1,34 @@
 
-# Welcome to your CDK Python project!
+# Reviewapps Github Webhook Broker 
 
-You should explore the contents of this project. It demonstrates a CDK app with an instance of a stack (`reviewapps_github_webhook_broker_stack`)
-which contains an Amazon SQS queue that is subscribed to an Amazon SNS topic.
+The PyGithub dependency does not work when using bundling options.  The 
+lambda will be deployed by building the deployment package zip prior to 
+running cdk deploy.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
-
-This project is set up like a standard Python project.  The initialization process also creates
-a virtualenv within this project, stored under the .venv directory.  To create the virtualenv
-it assumes that there is a `python3` executable in your path with access to the `venv` package.
-If for any reason the automatic creation of the virtualenv fails, you can create the virtualenv
-manually once the init process completes.
-
-To manually create a virtualenv on MacOS and Linux:
-
+# Building Lambda Deployment Package
 ```
-$ python3 -m venv .venv
-```
+# run a ubuntu container with a bind mount to lambda dir
+docker run -v "$(pwd)"/lambda:/lambda -it --rm ubuntu  
 
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
+# install python3, pip, git
+apt-get update && apt-get install -y -qq python3-pip git \
+&& cd /usr/local/bin && ln -s /usr/bin/python3 python \
+&& python3 -m pip install --upgrade pip \
+&& python3 -m pip install ipython \
+&& rm -rf /var/lib/apt/lists/*
 
-```
-$ source .venv/bin/activate
-```
+# install all dependencies required by the lambda
+cd /lambda
+pip install -t . -r requirements.txt
 
-If you are a Windows platform, you would activate the virtualenv like this:
+# exit the container 
+exit 
 
-```
-% .venv\Scripts\activate.bat
-```
+# zip up the directory as a lambda depoloyment package
+cd lambda
+zip -r9 my-deployment-package.zip .
 
-Once the virtualenv is activated, you can install the required dependencies.
-
-```
-$ pip install -r requirements.txt
-```
-
-At this point you can now synthesize the CloudFormation template for this code.
-
-```
-$ cdk synth
-```
-
-You can now begin exploring the source code, contained in the hello directory.
-There is also a very trivial test included that can be run like this:
-
-```
-$ pytest
-```
-
-To add additional dependencies, for example other CDK libraries, just add to
-your requirements.txt file and rerun the `pip install -r requirements.txt`
-command.
+ aws lambda update-function-code --function-name githubWebHook --zip-file fileb://my-deployment-package.zip  
 
 ## Useful commands
 
