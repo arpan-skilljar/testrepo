@@ -44,3 +44,26 @@ aws dynamodb query --table-name ReviewApps-POC-2 \
 aws dynamodb query --table-name ReviewApps-POC-2 \
     --key-condition-expression "pr_num = :pr_num" \
     --expression-attribute-values file://expression-attributes-pr.json
+
+
+
+aws dynamodb get-item \
+    --table-name reviewapps_poc \
+    --key '{"pr_num": {"N": "17"}}'
+
+aws dynamodb query \
+    --table-name reviewapps_poc \
+    --key-condition-expression "pr_num = :pr_num"  \
+    --expression-attribute-values '{":pr_num": {"N": "17"}}' \
+    --limit 1 \
+    --no-scan-index-forward 
+
+
+
+
+ aws dynamodb query \                                                                                                                                                          ✹
+    --table-name reviewapps_poc \
+    --key-condition-expression "pr_num = :pr_num"  \
+    --expression-attribute-values '{":pr_num": {"N": "17"}}' \
+    --limit 1 \
+    --scan-index-forward
