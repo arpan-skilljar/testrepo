@@ -12,7 +12,7 @@ class FlaskLambdaStack(Stack):
     def __init__(self, scope: Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
-        lambda_lith = _lambda.Function(self, "lambdalithHandler",
+        reviewapps_flask_api = _lambda.Function(self, "ReviewAppsPortalFlask2",
             runtime=_lambda.Runtime.PYTHON_3_8,
             code=_lambda.Code.from_asset("lambdas",
                 bundling=BundlingOptions(
@@ -26,7 +26,6 @@ class FlaskLambdaStack(Stack):
             handler="lambdalith.handler"
         )
 
-        # defines an API Gateway REST API resource backed by our "lambda_lith" function.
-        api_gw.LambdaRestApi(self, 'LambdalithAPI',
-                             handler=lambda_lith
+        api_gw.LambdaRestApi(self, 'ReviewAppsPortalFlaskAPI',
+                             handler=reviewapps_flask_api
                              )
